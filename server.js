@@ -65,7 +65,7 @@ function viewroles() {
 function viewemployees() {
     query = db.execute(`SELECT * FROM EMPLOYEE`);
     db.query(query, (err, res) => {
-        if (err) throw err;
+        if (err) throw err; 
         console.table(res);
         optionsmenu()
 })}
@@ -83,13 +83,32 @@ function adddept() {
             return false;
         }}
     })
+    .then((data) => {
+        db.query(`INSERT INTO department (names) VALUES ('${data.dept}')`, (err, res) => {
+            if (err) throw err; 
+            console.log(`${data.dept} has been added as a department.`);
+            optionsmenu()
+        }
+        )})
 }
-// .then add data for adddept
+
 
 function addrole() {
-    inquirer.prompt({
+    const dept = [];
+    db.query(`SELECT * FROM DEPARTMENT`, (err, res) => {
+        if (err) throw err;
+        res.map(data => {
+            const deptdata = {
+              name: data.names,
+              value: data.id
+            }
+            dept.push(deptdata);
+        })
+    })    
+    inquirer.prompt([
+    {
         type: 'input',
-        name: 'role',
+        name: 'title',
         message: "What role would you like to add?",
         validate: roleinput => {            
             if (roleinput) {
@@ -97,7 +116,9 @@ function addrole() {
         } else {
             console.log('Enter a new role!');
             return false;
-        }},
+        }}
+    },
+    {
         type: 'input',
         name: 'salary',
         message: "What is the salary of the role?",
@@ -108,12 +129,27 @@ function addrole() {
             console.log('Enter a salary!');
             return false;
         }}
-    })
+    },
+    {
+        type: 'list',
+        name: 'dept',
+        message: "What department is the role in?",
+        choices: dept
+    }
+    ])
+    .then((data) => {
+        db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${data.title}', '${data.salary}', '${data.dept}')`, (err, res) => {
+            if (err) throw err; 
+            console.log(`${data.title} has been added as a role.`);
+            optionsmenu()
+        }
+    )})
 }
-// .then add data for addrole
+
 
 function addemployee() {
-    inquirer.prompt({
+    inquirer.prompt([
+        {
         type: 'input',
         name: 'firstname',
         message: "What is the first name of the employee?",
@@ -123,7 +159,9 @@ function addemployee() {
         } else {
             console.log('Enter a first name!');
             return false;
-        }},
+        }}
+        },
+        {
         type: 'input',
         name: 'lastname',
         message: "What is the last name of the employee?",
@@ -134,6 +172,12 @@ function addemployee() {
             console.log('Enter a last name!');
             return false;
         }}
+        }
+    ])
+    .then((data) => {
+    db.query(`INSERT INTO employee (first_name, last_name) VALUES ('${data.firstname}', '${data.lastname}')`, (err, res) => {
+        if (err) throw err; 
+        console.log(`${data.firstname} ${data.lastname} has been added as an employee.`);
+        optionsmenu()
     })
-}
-// .then add data for addemployee
+    })}
