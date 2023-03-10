@@ -2,7 +2,7 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const table = require('console.table');
 
-
+// connects to mysql 
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -49,6 +49,7 @@ function optionsmenu() {
 }}
 )}
     
+// shows table from the database
 function viewdept() {
         query = db.execute(`SELECT * FROM DEPARTMENT`);
         db.query(query, (err, res) => {
@@ -73,6 +74,7 @@ function viewemployees() {
         optionsmenu()
 })}
 
+// adds data to the database
 function adddept() {
     inquirer.prompt({
         type: 'input',
@@ -149,6 +151,7 @@ function addrole() {
     )})
 }
 
+// pulls data from the database to use as options
     const role = [];
     db.query(`SELECT * FROM ROLES`, (err, res) => {
         if (err) throw err;
@@ -206,14 +209,14 @@ function addemployee() {
         {
             type: 'number',
             name: 'manager',
-            message: "Who is the employee's manager?",
+            message: "Who is the employee's manager ID?",
             validate: managerinput => {            
                 if (managerinput) {
                 return true;
             } else {
                 console.log('Enter a manager ID!');
                 return false;
-            }} // incomplete 
+            }} 
         }
     ])
     .then((data) => {
