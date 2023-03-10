@@ -146,6 +146,27 @@ function addrole() {
     )})
 }
 
+    const role = [];
+    db.query(`SELECT * FROM ROLES`, (err, res) => {
+        if (err) throw err;
+        res.map(data => {
+            const roledata = {
+              name: data.title,
+              value: data.id
+            }
+            role.push(roledata);
+        })
+    });        
+       const employee = [];
+    db.query(`SELECT * FROM EMPLOYEE`, (err, res) => {
+        if (err) throw err;
+        res.map(data => {
+            const employeedata = {
+              name: data.first_name,
+            }
+            employee.push(employeedata);
+        })
+    }); 
 
 function addemployee() {
     inquirer.prompt([
@@ -172,12 +193,55 @@ function addemployee() {
             console.log('Enter a last name!');
             return false;
         }}
+        },
+        {
+            type: 'list',
+            name: 'role',
+            message: "What is the employee's role?",
+            choices: role
+        },
+        {
+            type: 'number',
+            name: 'manager',
+            message: "Who is the employee's manager?",
+            validate: managerinput => {            
+                if (managerinput) {
+                return true;
+            } else {
+                console.log('Enter a manager ID!');
+                return false;
+            }} // incomplete 
         }
     ])
     .then((data) => {
-    db.query(`INSERT INTO employee (first_name, last_name) VALUES ('${data.firstname}', '${data.lastname}')`, (err, res) => {
+    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
+    VALUES ('${data.firstname}', '${data.lastname}', '${data.role}', '${data.manager}')`, (err, res) => {
         if (err) throw err; 
         console.log(`${data.firstname} ${data.lastname} has been added as an employee.`);
         optionsmenu()
     })
     })}
+
+function updaterole() {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'role',
+            message: "What is the employee's new role?",
+            choices: role
+        },        
+        {
+            type: 'list',
+            name: 'employee',
+            message: "Which employee's role do you want to update?",
+            choices: employee
+        },
+    ])
+    .then((data) => {
+    db.query(`UPDATE EMPLOYEE SET role_id = ${data.role} WHERE first_name = '${data.employee}'`, (err, res) => {
+        if (err) throw err; 
+        console.log(`${data.employee}'s role has been updated to ${data.role}`);
+        optionsmenu() 
+    })
+    })   
+}
