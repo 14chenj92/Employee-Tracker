@@ -25,7 +25,8 @@ function optionsmenu() {
      'Add a department',
      'Add a role',
      'Add an employee',
-     'Update an employee role'
+     'Update an employee role', 
+     'End'
     ],
     })
     .then((data) => {
@@ -43,6 +44,8 @@ function optionsmenu() {
             addemployee();
         } else if (data.options === 'Update an employee role') {
             updaterole();
+        } else if (data.options === 'End') {
+            db.end();
 }}
 )}
     
