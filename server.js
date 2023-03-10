@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const table = require('console.table');
+
 
 // connects to mysql 
 const db = mysql.createConnection({
@@ -59,7 +59,9 @@ function viewdept() {
 })}
 
 function viewroles() {
-    query = db.execute(`SELECT * FROM ROLES`);
+    query = db.execute(`SELECT roles.title, roles.salary, 
+    roles.department_id AS role_id, department.names AS department FROM ROLES
+    JOIN department ON roles.id = department.id`);
     db.query(query, (err, res) => {
         if (err) throw err;
         console.table(res);
@@ -67,7 +69,11 @@ function viewroles() {
 })}
 
 function viewemployees() {
-    query = db.execute(`SELECT * FROM EMPLOYEE`);
+    query = db.execute(`SELECT employee.id, employee.first_name, 
+    employee.last_name, roles.title, department.names AS department, roles.salary  
+    FROM EMPLOYEE
+    JOIN department ON employee.role_id = department.id
+    JOIN roles ON employee.manager_id = roles.id`);
     db.query(query, (err, res) => {
         if (err) throw err; 
         console.table(res);
@@ -157,8 +163,7 @@ function addrole() {
         if (err) throw err;
         res.map(data => {
             const roledata = {
-              name: data.title,
-              value: data.id
+              name: data.title, 
             }
             role.push(roledata);
         })
@@ -209,7 +214,7 @@ function addemployee() {
         {
             type: 'number',
             name: 'manager',
-            message: "Who is the employee's manager ID?",
+            message: "What is the employee's manager ID?",
             validate: managerinput => {            
                 if (managerinput) {
                 return true;
@@ -244,9 +249,14 @@ function updaterole() {
         },
     ])
     .then((data) => {
-    db.query(`UPDATE EMPLOYEE SET role_id = ${data.role} WHERE first_name = '${data.employee}'`, (err, res) => {
+    db.query(`SELECT employee.id, employee.first_name, 
+    employee.last_name, roles.title, department.names AS department, roles.salary  
+    FROM EMPLOYEE
+    JOIN department ON employee.role_id = department.id
+    JOIN roles ON employee.manager_id = roles.id`);
+    db.query(`UPDATE EMPLOYEE SET roles = '${data.role}' WHERE first_name = '${data.employee}'`, (err, res) => {
         if (err) throw err; 
-        console.log(`${data.employee}'s role has been updated to ${data.role}`);
+        console.log(`${data.employee}'s role has been updated.`);
         optionsmenu() 
     })
     })   
