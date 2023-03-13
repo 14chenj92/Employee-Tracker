@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-
+const cTable = require('console.table');
 
 // connects to mysql 
 const db = mysql.createConnection({
@@ -69,16 +69,20 @@ function viewroles() {
 })}
 
 function viewemployees() {
-    query = db.execute(`SELECT employee.id, employee.first_name, 
-    employee.last_name, roles.title, department.names AS department, roles.salary  
-    FROM EMPLOYEE
-    JOIN department ON employee.role_id = department.id
-    JOIN roles ON employee.manager_id = roles.id`);
+    query =`SELECT employee.id, employee.first_name, 
+    employee.last_name, roles.title, department.names AS department, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS Manager
+    FROM employee
+    JOIN roles ON employee.role_id = roles.id
+    JOIN department on roles.department_id = department.id
+    LEFT JOIN employee AS manager ON employee.manager_id = manager.id`;
     db.query(query, (err, res) => {
         if (err) throw err; 
         console.table(res);
         optionsmenu()
-})}
+})
+
+
+}
 
 // adds data to the database
 function adddept() {
@@ -173,7 +177,7 @@ function addrole() {
         if (err) throw err;
         res.map(data => {
             const employeedata = {
-              name: data.first_name,
+              name: data.first_name + " " + data.last_name
             }
             employee.push(employeedata);
         })
@@ -244,20 +248,26 @@ function updaterole() {
         {
             type: 'list',
             name: 'employee',
-            message: "Which employee's role do you want to update?",
+            message: "Whose role do you want to update?",
             choices: employee
         },
     ])
-    .then((data) => {
-    db.query(`SELECT employee.id, employee.first_name, 
-    employee.last_name, roles.title, department.names AS department, roles.salary  
-    FROM EMPLOYEE
-    JOIN department ON employee.role_id = department.id
-    JOIN roles ON employee.manager_id = roles.id`);
-    db.query(`UPDATE EMPLOYEE SET roles = '${data.role}' WHERE first_name = '${data.employee}'`, (err, res) => {
-        if (err) throw err; 
-        console.log(`${data.employee}'s role has been updated.`);
-        optionsmenu() 
-    })
+    .then((answers) => {
+        // Get role id from the role title
+        db.query(`SELECT * FROM roles WHERE roles.title="${answers.role}"`, (err,res)=>{
+            if(err)
+                console.error(err);
+            else {
+                console.log(res);
+                const role_id = res[0].id;
+                db.query(`UPDATE employee SET role_id=${role_id} WHERE first_name="${answers.employee.split(" ")[0]}" AND last_name="${answers.employee.split(" ")[1]}"`, (err,res)=>{
+                    if(err)
+                        console.error(err);
+                    else
+                        console.log(res);
+                });
+                viewemployees();
+            }
+        })
     })   
 }
