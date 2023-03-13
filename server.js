@@ -61,7 +61,7 @@ function viewdept() {
 function viewroles() {
     query = db.execute(`SELECT roles.title, roles.salary, 
     roles.department_id AS role_id, department.names AS department FROM ROLES
-    JOIN department ON roles.id = department.id`);
+    JOIN department on roles.department_id = department.id`);
     db.query(query, (err, res) => {
         if (err) throw err;
         console.table(res);
@@ -182,6 +182,17 @@ function addrole() {
             employee.push(employeedata);
         })
     }); 
+    const rolelist = [];
+    db.query(`SELECT * FROM ROLES`, (err, res) => {
+        if (err) throw err;
+        res.map(data => {
+            const rolelistdata = {
+              name: data.title, 
+              value: data.id
+            }
+            rolelist.push(rolelistdata);
+        })
+    });     
 
 function addemployee() {
     inquirer.prompt([
@@ -213,7 +224,7 @@ function addemployee() {
             type: 'list',
             name: 'role',
             message: "What is the employee's role?",
-            choices: role
+            choices: rolelist
         },
         {
             type: 'number',

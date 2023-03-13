@@ -42,10 +42,15 @@ THEN I am prompted to select an employee to update and their new role and this i
 ```
   
   ## Installation
-
+  * clone repo
+  * install node 
+  * install packages (mysql2, inquirer, console.table)
+  * open terminal and input node server
 
   ## Usage
-  Video demo: 
+  Video Link: https://drive.google.com/file/d/1J8-691s9QBL079uvI7fsXW0tSz4Uak_8/view
+
+ <img src="/images/samplevid.gif">
   
 
   ## License
